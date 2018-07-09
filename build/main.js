@@ -100,7 +100,8 @@ var HomePage = /** @class */ (function () {
                 "59": name,
                 "62": additionalInfo
             };
-            return this._getQrString(sgqrFormat);
+            var qrWithoutCRC = this._getQrString(sgqrFormat);
+            return qrWithoutCRC + +"6304" + this.getCRC(qrWithoutCRC + "6304");
         }
     };
     HomePage.prototype._getQrString = function (obj) {
@@ -119,6 +120,34 @@ var HomePage = /** @class */ (function () {
             }
         }
         return _createdQr;
+    };
+    HomePage.prototype.getCRC = function (qrString) {
+        // let inCodeCRC = qrString.slice(-4);
+        // qrString = qrString.slice(0,-4);
+        var crc = 0xFFFF;
+        var polynomial = 0x1021;
+        var i, j;
+        for (i = 0; i < qrString.length; i++) {
+            var b = qrString.charCodeAt(i);
+            for (j = 0; j < 8; j++) {
+                var bit = ((b >> (7 - j) & 1) == 1);
+                var c15 = ((crc >> 15 & 1) == 1);
+                crc <<= 1;
+                if (c15 ^ bit)
+                    crc ^= polynomial;
+            }
+        }
+        crc &= 0xFFFF;
+        debugger;
+        console.log(crc);
+        console.log(crc.toString(16).toUpperCase());
+        var crcToreturn = crc.toString(16).toUpperCase();
+        while (crcToreturn.length < 4) {
+            crcToreturn = "0" + crcToreturn;
+        }
+        console.log(crcToreturn);
+        return crcToreturn;
+        //01221900B
     };
     HomePage = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["m" /* Component */])({
